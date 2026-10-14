@@ -1,1 +1,1 @@
-# P03 — Temas de TCC: plano do projeto e trilha de estudos
+# P03 — Temas de TCC vs. disponibilidade docente
