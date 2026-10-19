@@ -14,8 +14,10 @@ let temas = [
     {id: "t3", area: "Cibersegurança", titulo: "Análise de vulnerabilidades em sistemas web de universidades", desc: "descincrivel", docenteId: "ppr", vagas: 3, status: "aberta"}
 ]
 
+let temas_alunos = [
+   
+]
+
 let inscricoes = [
-    {id: "ins1", temaId: "t1", alunoId: "agp", status: "pendente"},
-    {id: "ins2", temaId: "t2", alunoId: "apa", status: "pendente"},
-    {id: "ins3", temaId: "t3", alunoId: "aps", status: "pendente"}
+
 ]

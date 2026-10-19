@@ -36,16 +36,86 @@ function tela_login(){
 function tela_aluno(){
     const tela = document.getElementById("tela");
 
+    const meus_temas = temas_alunos.filter(tema => tema.alunoId === usuario_logado.id);
+
+    const html_meus_temas = meus_temas.map(tema => `
+        <div class="card">
+        <h3>${tema.titulo}</h3>
+        <h5>${tema.area}</h5>
+        <p>${tema.desc}</p>
+        </div>
+        `).join("");
+
+
     tela.innerHTML = `
     <h2>Seja bem-vindo(a), ${usuario_logado.nome}</h2>
     <div><button id="botaoSAIR">Sair</button></div>
     <h3>Aqui estão os suas inscrições</h3>
+
+    ${html_meus_temas}
+
+    <div><button id="botaoNOVAINSCRICAO">Realizar Nova Inscrição</button></div>
     `
 
     document.getElementById("botaoSAIR").addEventListener("click", () => {
         usuario_logado = null;
         render();
     })
+
+    document.getElementById("botaoNOVAINSCRICAO").addEventListener("click", () => {
+        tela_inscricao_aluno();
+    })
+}
+
+function tela_inscricao_aluno() {
+    const tela = document.getElementById("tela");
+
+    const temas_diponiveis = temas.filter(tema => tema.vagas > 0 && tema.status === "aberta");
+
+    const html_temas_disponiveis = temas_diponiveis.map(tema => `
+        <div class="card">
+        <h3>${tema.titulo}</h3>
+        <h5>${tema.area}</h5>
+        <p>${tema.desc}</p>
+        <button class="botaoINSCREVER" data-tema-id="${tema.id}">Solicitar Inscrição</button>
+        </div>
+        `).join("");
+
+    tela.innerHTML = `
+    <h2>Esses são os temas disponíveis para inscrição, ${usuario_logado.nome}!</h2>
+    <div><button id="botaoSAIR">Sair</button></div>
+
+    <h2>Temas Disponíveis</h2>
+    ${html_temas_disponiveis}
+    `
+
+    document.getElementById("botaoSAIR").addEventListener("click", () => {
+        usuario_logado = null;
+        render();
+    })
+
+    document.querySelectorAll(".botaoINSCREVER").forEach(botao => {
+        botao.addEventListener("click", () => {
+
+            const temaId = botao.dataset.temaId;
+
+            inscricoes.push({
+                id: `insc${Date.now()}`,
+                temaId: temaId,
+                alunoId: usuario_logado.id,
+                status: "pendente"
+            });
+
+            const tema = temas.find(t => t.id === temaId);
+            tema.status = "pendente";
+
+            salvar();
+            alert("Solicitação feita com sucesso!");
+            console.log(temaId);
+            render();
+        });
+    });
+
 }
 
 function tela_docente(){
@@ -57,6 +127,7 @@ function tela_docente(){
     <h2>Seja bem-vindo(a), ${usuario_logado.nome}</h2>
     <div><button id ="cadastrartemas">Cadastrar temas</button></div>
     <div><button id ="temasativos">Temas ativos</button></div>
+    <div><button id ="inscricoes">Inscrições</button></div>
     `
 
     document.getElementById("botaoSAIR").addEventListener("click", () => {
@@ -70,6 +141,10 @@ function tela_docente(){
 
     document.getElementById("temasativos").addEventListener("click", () => {
         tela_docente_temas();
+    })
+
+    document.getElementById("inscricoes").addEventListener("click", () => {
+        tela_docente_inscricoes();
     })
 }
 
@@ -125,8 +200,6 @@ function tela_cadastro_temas(){
     })
 }
 
-
-
 function tela_docente_temas(){
 
     const tela = document.getElementById("tela");
@@ -175,6 +248,66 @@ function tela_docente_temas(){
     document.getElementById("botaovoltar").addEventListener("click", () => {
         render();
     })
+
+}
+
+function tela_docente_inscricoes(){
+
+    const tela = document.getElementById("tela");
+
+    const solicitacoes_inscricoes = inscricoes.filter(inscricao => inscricao.status === "pendente");
+
+    const html_solicitacoes_inscricoes = solicitacoes_inscricoes.map(inscricao => `
+        <div class="card">
+        <h3>${temas.find(tema => tema.id === inscricao.temaId).titulo}</h3>
+        <h5> ${usuarios.find(aluno => aluno.id === inscricao.alunoId).nome}</h5>
+        <p>${inscricao.status}</p>
+        <button class="botaoACEITAR" data-inscricao-id="${inscricao.id}">Aceitar Inscrição</button>
+        </div>
+        `).join("");
+
+    tela.innerHTML = 
+    `
+    <div>
+    <button id="botaoSAIR">Sair</button>
+    <button id="botaovoltar">Voltar</button>
+    </div>
+    <h2>Aqui estão as solicitações dos alunos, ${usuario_logado.nome}</h2>
+
+    ${html_solicitacoes_inscricoes}
+    `
+
+    document.getElementById("botaoSAIR").addEventListener("click", () => {
+        usuario_logado = null;
+        render();
+    })
+
+    document.getElementById("botaovoltar").addEventListener("click", () => {
+        render();
+    })
+
+    document.querySelectorAll(".botaoACEITAR").forEach(botao => {
+    botao.addEventListener("click", () => {
+
+        const inscricaoId = botao.dataset.inscricaoId;
+        const inscricao = inscricoes.find(i => i.id === inscricaoId);
+        const tema = temas.find(t => t.id === inscricao.temaId);
+
+        temas_alunos.push({
+            id: `ta${Date.now()}`,
+            area: tema.area,
+            titulo: tema.titulo,
+            desc: tema.desc,
+            alunoId: inscricao.alunoId
+        });
+
+        inscricao.status = "aceita";
+
+        salvar();
+        alert("Inscrição aceita com sucesso!");
+        render();
+    });
+});
 
 }
 
